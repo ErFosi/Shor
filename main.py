@@ -36,7 +36,7 @@ if __name__=="__main__":
             primo2=i[1]
             n = primo1*primo2
             print(str(primo1)+" x "+str(primo2))
-            for x in range(0, 2):
+            for x in range(0, 3):
                 #time.sleep(1)
                 start_time = time.time()
                 if (x==0):
