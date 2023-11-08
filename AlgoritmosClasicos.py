@@ -1,5 +1,6 @@
 import random
 import sympy
+from math import gcd
 ######################Implementación Shor con algoritmo clásico#######################
 def shors_algorithm(N):
     #Implementacion de shor en ordenador clasico
@@ -36,20 +37,25 @@ def buscar_primo_fuerzaBruta(n):
     iteracion=0
     for x in list(sympy.sieve.primerange(0, n)):
         iteracion=iteracion+1
-        print("Iteracion:"+str(iteracion) +" resto:"+ str(n % x))
+        #print("Iteracion:"+str(iteracion) +" resto:"+ str(n % x))
         if (n % x==0):
             print("Primer primo encontrado")
             primo1=x
+            break
     primo2=n/primo1
-    print("Primo1:"+str(primo1))
-    print("Primo2:"+str(primo2))
-    return(primo1,primo2)
+    #print("Primo1:"+str(primo1))
+    #print("Primo2:"+str(primo2))
+    return(primo1,int(primo2))
+##############Implementación de GNFS de la libreria sympy###########################
+def factorizar(N):
+    p, q = sympy.factorint(N).keys()
+    return (p, q)
 ##############Implementación de Shor cuántico#####################################
 
 
 #############Funciones de uso común####################################
-def gcd(a,b):#Para comprobar si se puede dividir con resto 0, divisor.
+"""def gcd(a,b):#Para comprobar si se puede dividir con resto 0, divisor.
     if b==0:
         return a
     else:
-        return gcd(b,a%b)
+        return gcd(b,a%b)"""
