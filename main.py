@@ -48,30 +48,31 @@ def main():
                 factors = buscar_primo_fuerzaBruta(n)
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                fuerza_bruta_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
                 q_found = factors[0]
                 p_found = factors[1]
+                fuerza_bruta_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
+                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
                 print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
             elif x == 1:
                 algoritmo = "Shor Clasico"
                 factors = shors_algorithm(n)
                 end_time = time.time()
                 elapsed_time = end_time - start_time
-                shor_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
                 q_found = factors[0]
                 p_found = factors[1]
+                shor_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
+                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
+                
                 print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
             else:
                 algoritmo = "GNFS"
                 factors = factorizar(n)
                 end_time = time.time()
+                q_found = factors[0]
+                p_found = factors[1]
                 elapsed_time = end_time - start_time
                 gnfs_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
                 all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                q_found = factors[0]
-                p_found = factors[1]
                 print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
 
             
