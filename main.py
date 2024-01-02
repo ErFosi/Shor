@@ -1,102 +1,56 @@
-from AlgoritmosClasicos import buscar_primo_fuerzaBruta
-from AlgoritmosClasicos import shors_algorithm
-from AlgoritmosClasicos import factorizar
-import sympy
-import random
-import csv
-import time
+import test_gates
+from qiskit import QuantumCircuit, QuantumRegister, Aer, execute
+from qiskit.visualization import plot_histogram
+from qiskit.circuit.library import QFT
+from gates import Exp_mod
 
-#from sympy import EllipticCurve, Point, Symbol
-#Metodo para generar una lista de numeros resultado de una multiplicación de 2 primos
-def generar_lista_primos(intervalo,cuantos):
-    listaN=[]
-    inicio = 100
-    while len(listaN) < cuantos:
-        primos = list(sympy.primerange(inicio, inicio + 200))
-        if len(primos) >= 2:
-            primo1, primo2 = random.sample(primos, 2)
-            listaN.append((primo1, primo2))
-            inicio = primo2 + 1
-            inicio=inicio+intervalo
-        else:
-            inicio += 100  # Si no hay suficientes primos en este rango, avanzamos
-    #print(listaN)
 
-    return(listaN)
+
 def main():
-    all_results = []
 
-    fuerza_bruta_results = []
-    shor_results = []
-    gnfs_results = []
 
-    primos = generar_lista_primos(1000, 4)
-    print(primos)
-    time.sleep(10)
+    # Assuming n qubits are sufficient for N=15
+    n = 4
 
-    for i in primos:
-        primo1 = i[0]
-        primo2 = i[1]
-        n = primo1 * primo2
-        print(str(primo1) + " x " + str(primo2))
+    # Initialize quantum registers
+    regx = QuantumRegister(n, 'regx')
+    reg1 = QuantumRegister(n, 'reg1')
+    regX = QuantumRegister(1, 'regX')  # Assuming a single qubit for simplicity
+    reg2 = QuantumRegister(n, 'reg2')
+    regN = QuantumRegister(n, 'regN')
+    regN_ctrl = QuantumRegister(n, 'regN_ctrl')
+    ancil_ctrl = QuantumRegister(n, 'ancil_ctrl')  # Adjust size as necessary
+    meas = QuantumRegister(n, 'meas')
 
-        for x in range(3):
-            start_time = time.time()
+    # Initialize the circuit
+    c = QuantumCircuit(regx, reg1, regX, reg2, regN, regN_ctrl, ancil_ctrl, meas)
 
-            if x == 0:
-                algoritmo = "Fuerza Bruta"
-                factors = buscar_primo_fuerzaBruta(n)
-                end_time = time.time()
-                elapsed_time = end_time - start_time
-                q_found = factors[0]
-                p_found = factors[1]
-                fuerza_bruta_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
-            elif x == 1:
-                algoritmo = "Shor Clasico"
-                factors = shors_algorithm(n)
-                end_time = time.time()
-                elapsed_time = end_time - start_time
-                q_found = factors[0]
-                p_found = factors[1]
-                shor_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                
-                print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
-            else:
-                algoritmo = "GNFS"
-                factors = factorizar(n)
-                end_time = time.time()
-                q_found = factors[0]
-                p_found = factors[1]
-                elapsed_time = end_time - start_time
-                gnfs_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                all_results.append({'N': n, 'Tiempo (segundos)': elapsed_time, 'Primo1': p_found, 'Primo2': q_found, 'Algoritmo': algoritmo})
-                print(f"Primos encontrados para N={n}: {p_found} y {q_found}. Tiempo: {elapsed_time} segundos con {algoritmo}")
+    # Prepare initial state
+    c.h(regX)  # Create a superposition of x values
+    # Initialize regN to represent the number 15
+    c.x(regN[0])
+    c.x(regN[1])
+    c.x(regN[2])
+    c.x(regN[3])
 
-            
+    # Call Exp_mod function (assuming implementation is provided)
+    c = Exp_mod(c, regx, reg1, regX, reg2, regN, regN_ctrl, ancil_ctrl)
 
-    with open('resultados.csv', mode='w', newline='') as csvfile:
-        fieldnames = ['N', 'Tiempo (segundos)', 'Primo1', 'Primo2', 'Algoritmo']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(all_results)
+    # Inverse QFT for extracting the phase
+    c.append(QFT(num_qubits=n, inverse=True), regx[:])
 
-    with open('fuerza_bruta_results.csv', mode='w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(fuerza_bruta_results)
+    # Measurement
+    c.measure(regx, meas)
 
-    with open('shor_results.csv', mode='w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(shor_results)
+    # Execute the circuit
+    backend = Aer.get_backend('qasm_simulator')
+    job = execute(c, backend, shots=1024)
+    result = job.result()
+    counts = result.get_counts(c)
 
-    with open('gnfs_results.csv', mode='w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(gnfs_results)
+    # Plot the results
+    plot_histogram(counts)
 
+ 
 if __name__ == "__main__":
     main()
