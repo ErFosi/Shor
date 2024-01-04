@@ -1,9 +1,9 @@
 import test_gates
-from qiskit import QuantumCircuit, QuantumRegister, Aer, execute
+from qiskit import ClassicalRegister,QuantumCircuit, QuantumRegister, Aer, execute
 from qiskit.visualization import plot_histogram
 from qiskit.circuit.library import QFT
 from gates import Exp_mod
-
+import matplotlib as plt
 
 
 def main():
@@ -19,8 +19,8 @@ def main():
     reg2 = QuantumRegister(n, 'reg2')
     regN = QuantumRegister(n, 'regN')
     regN_ctrl = QuantumRegister(n, 'regN_ctrl')
-    ancil_ctrl = QuantumRegister(n, 'ancil_ctrl')  # Adjust size as necessary
-    meas = QuantumRegister(n, 'meas')
+    ancil_ctrl = QuantumRegister(n+3, 'ancil_ctrl')  # Adjust size as necessary
+    meas =  ClassicalRegister(n, 'meas')
 
     # Initialize the circuit
     c = QuantumCircuit(regx, reg1, regX, reg2, regN, regN_ctrl, ancil_ctrl, meas)
@@ -33,6 +33,11 @@ def main():
     c.x(regN[2])
     c.x(regN[3])
 
+    # Set a = 7 in reg1
+    c.x(reg1[0])
+    c.x(reg1[1])
+    c.x(reg1[2])
+    
     # Call Exp_mod function (assuming implementation is provided)
     c = Exp_mod(c, regx, reg1, regX, reg2, regN, regN_ctrl, ancil_ctrl)
 
@@ -49,8 +54,9 @@ def main():
     counts = result.get_counts(c)
 
     # Plot the results
-    plot_histogram(counts)
-
+    fig = plot_histogram(counts)
+    fig.savefig("histogram.png")  # Saves the plot as an image file
+    print(result)
  
 if __name__ == "__main__":
     main()
