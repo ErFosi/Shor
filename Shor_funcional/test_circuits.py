@@ -47,7 +47,7 @@ def circuitos():
     backend =QuantumInstance(qiskit_ibm_provider.IBMProvider(token=tok).get_backend('ibm_cairo'))
     shor_instance = Shor(quantum_instance=backend)
     primos_pequeños=generar_lista_primos(10,8)
-    primos = generar_lista_primos(200, 10)
+    primos = generar_lista_primos(200, 25)
     primos=primos_pequeños + primos
     print(primos)
     resultados=[]
