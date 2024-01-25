@@ -30,7 +30,7 @@ def main():
     shor_results = []
     gnfs_results = []
     primos_pequeños=generar_lista_primos(10,7)
-    primos = generar_lista_primos(1000, 9)
+    primos = generar_lista_primos(1000, 40)
     primos=primos_pequeños+primos
     print(primos)
     time.sleep(10)
