@@ -44,17 +44,20 @@ def guardar_circuito(circuito, archivo):
 
 def circuitos():
     tok='0818642c014d305e9ed09b128e956f8664588a5c0e5cf8e7551a27ce6227f4abfba5bad00b11c5906020bd092cc14cee499068fbc68bfab33475bfc09f3cf4fa'
-    backend =QuantumInstance(qiskit_ibm_provider.IBMProvider(token=tok).get_backend('ibm_cairo'))
+    backend =QuantumInstance(qiskit_ibm_provider.IBMProvider(token=tok).get_backend('ibm_kyoto'))
     shor_instance = Shor(quantum_instance=backend)
     primos_pequeños=generar_lista_primos(10,8)
-    primos = generar_lista_primos(200, 25)
+    primos = generar_lista_primos(200, 10)
     primos=primos_pequeños + primos
     print(primos)
+    primos=[1147,2491,5183,11663,19043,47053,67591,131753,295927,576077,1065023,2663399,4235339,11029037,19079399,44568967,76685033,164506267,308740037,899160187]
     resultados=[]
     carpeta_circuitos = 'Shor_funcional/circuits'
-    for primo1, primo2 in primos:
+    for primo1 in primos:
         inicio = time.time()
-        producto = primo1 * primo2
+        primo2=""
+        #producto = primo1 * primo2
+        producto =primo1
         circuit = shor_instance.construct_circuit(producto, 2)
         tiempo = time.time()
         nombre_archivo_qasm = f"{carpeta_circuitos}/{producto}_{primo1}_{primo2}_circuit.qasm"
@@ -65,6 +68,5 @@ def circuitos():
 
 
 if __name__ == "__main__":
-    
     resultados=circuitos()
     guardar_resultados(resultados)
