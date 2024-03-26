@@ -1,0 +1,192 @@
+from Shor import Shor
+from Shor import ShorResult
+import math
+from qiskit import IBMQ
+from qiskit import Aer
+from qiskit.utils import QuantumInstance
+from qiskit_ibm_runtime import QiskitRuntimeService
+import qiskit_ibm_provider
+from qiskit import IBMQ, transpile
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+import array
+from typing import Optional, Union, List, Tuple
+import csv
+
+
+
+def _get_factors(self, N: int, a: int, measurement: str) -> Optional[List[int]]:
+    """Apply the continued fractions to find r and the gcd to find the desired factors."""
+    x_final = int(measurement, 2)
+    
+
+    if x_final <= 0:
+        fail_reason = "x_final value is <= 0, there are no continued fractions."
+    else:
+        fail_reason = None
+        
+    # Calculate T and x/T
+    T_upper = len(measurement)
+    T = pow(2, T_upper)
+    x_over_T = x_final / T
+
+    # Cycle in which each iteration corresponds to putting one more term in the
+    # calculation of the Continued Fraction (CF) of x/T
+
+    # Initialize the first values according to CF rule
+    i = 0
+    b = array.array("i")
+    t = array.array("f")
+
+    b.append(math.floor(x_over_T))
+    t.append(x_over_T - b[i])
+
+    exponential = 0.0
+    while i < N and fail_reason is None:
+        # From the 2nd iteration onwards, calculate the new terms of the CF based
+        # on the previous terms as the rule suggests
+        if i > 0:
+            b.append(math.floor(1 / t[i - 1]))
+            t.append((1 / t[i - 1]) - b[i])  # type: ignore
+
+        # Calculate the denominator of the CF using the known terms
+        denominator = Shor._calculate_continued_fraction(b)
+
+        # Increment i for next iteration
+        i += 1
+
+        if denominator % 2 == 1:
+            print("Odd denominator, will try next iteration of continued fractions.")
+            continue
+
+        # Denominator is even, try to get factors of N
+        # Get the exponential a^(r/2)
+
+        if denominator < 1000:
+            exponential = pow(a, denominator / 2)
+
+        # Check if the value is too big or not
+        if exponential > 1000000000:
+            fail_reason = "denominator of continued fraction is too big."
+        else:
+            # The value is not too big,
+            # get the right values and do the proper gcd()
+            putting_plus = int(exponential + 1)
+            putting_minus = int(exponential - 1)
+            one_factor = math.gcd(putting_plus, N)
+            other_factor = math.gcd(putting_minus, N)
+
+            # Check if the factors found are trivial factors or are the desired factors
+            if any(factor in {1, N} for factor in (one_factor, other_factor)):
+                print("Found just trivial factors, not good enough.")
+                # Check if the number has already been found,
+                # (use i - 1 because i was already incremented)
+                if t[i - 1] == 0:
+                    fail_reason = "the continued fractions found exactly x_final/(2^(2n))."
+            else:
+                # Successfully factorized N
+                return sorted((one_factor, other_factor))
+
+    # Search for factors failed, write the reason for failure to the debug logs
+
+    return None
+
+
+
+#IBMQ.save_account('token')
+# Crear una instancia de la clase Shor
+# Cargar tu cuenta de IBMQ
+#IBMQ.load_account()
+#IBMQ.save_account('0818642c014d305e9ed09b128e956f8664588a5c0e5cf8e7551a27ce6227f4abfba5bad00b11c5906020bd092cc14cee499068fbc68bfab33475bfc09f3cf4fa', overwrite=True)
+
+#service = QiskitRuntimeService()
+#service.backends(simulator=False, operational=True, min_num_qubits=30)
+# Seleccionar el proveedor y el backend
+#provider = IBMQ.get_provider(hub='ibm-q')
+tok='
+
+tok_profesor=""
+#backend = QuantumInstance(qiskit_ibm_provider.IBMProvider(token=tok).get_backend('ibmq_qasm_simulator'))
+#backend = QuantumInstance(Aer.get_backend('qasm_simulator'))
+#backend = QuantumInstance(provider.get_backend('ibm_cairo'))
+#backend = QuantumInstance(provider.get_backend('simulator_mps'))
+
+
+# Valores para factorizar
+N1 = 15
+A1 = 2
+N2 =15 #31*37
+A2 = 7
+
+
+#circuit = shor_instance.construct_circuit(N2, A2)
+#circuit.draw(output='mpl', filename='circuit3137.png')  #Descomentar si se quiere guardar la imagen del circuito
+#decomposed_circuit = circuit.decompose()  # Descomponer el circuito una vez
+#decomposed_circuit = decomposed_circuit.decompose()  # Descomponer nuevamente si es necesario
+#decomposed_circuit.draw(output='mpl',filename="decompose_expmod") #Descomentar si se quiere guardar la imagen del circuito con la exp mod descompuesta en sumas
+
+
+#Llamar al método factor
+
+#factors_N1 = shor_instance.factor(15, 2)
+#factors_N2 = shor_instance.factor(N2, A2)
+
+#################################################################
+#Prueba de un unico circuito porque me da error al hacer .factor#
+#################################################################
+
+
+primos=[15,21,35,77,143,341,629,1147,2491,5183,11663,19043,47053,67591,131753,295927,576077,1065023,2663399,4235339,11029037,19079399,44568967,76685033,164506267,308740037,899160187]
+
+backend=qiskit_ibm_provider.IBMProvider(token=tok).get_backend('ibm_cusco')
+shor_instance = Shor(quantum_instance=QuantumInstance(backend))
+
+result =ShorResult()
+# La lista de primos para la cual se ejecutará el algoritmo de Shor
+primos = [15, 21, 35, 77, 143, 341, 629, 1147, 2491, 5183, 11663, 19043, 47053, 67591, 131753, 295927, 576077, 1065023, 2663399, 4235339, 11029037, 19079399, 44568967, 76685033, 164506267, 308740037, 899160187]
+
+# Función para ejecutar el algoritmo de Shor para un solo N
+def ejecutar_shor(N):
+    A2 = 2  # Supongamos que elegimos un A constante por simplicidad; en la práctica, esto podría ser más complejo
+    circuit = shor_instance.construct_circuit(N, A2, measurement=True)
+    transpiled_circuit = transpile(circuit, backend)
+    quantum_instance = QuantumInstance(backend=backend,shots=1000)
+    result = quantum_instance.execute(transpiled_circuit, had_transpiled=True)
+    counts = result.get_counts()
+
+    successful_counts = 0
+    factors = []
+    total_counts = len(counts)
+
+    for measurement in counts.keys():
+        obtained_factors = _get_factors(self=Shor,N=N2, a=A2,measurement= measurement)
+        if obtained_factors:
+            successful_counts += 1
+            if obtained_factors not in factors:
+                factors.extend(obtained_factors)
+
+    metadata = result._metadata
+    duracion = metadata.get('time_taken', -1)
+
+    return N, duracion, successful_counts, total_counts, factors
+
+# Preparación del archivo CSV para guardar los resultados
+nombre_archivo_csv = 'resultados_cuanticos.csv'
+with open(nombre_archivo_csv, mode='w', newline='') as archivo_csv:
+    escritor_csv = csv.writer(archivo_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    escritor_csv.writerow(['N', 'Tiempo de Ejecución (s)', 'Aciertos', 'Conteos Totales', 'Factores Encontrados'])
+
+for N2 in primos:
+    N, duracion, successful_counts, total_counts, factors = ejecutar_shor(N2)
+    with open(nombre_archivo_csv, mode='a', newline='') as archivo_csv:
+        escritor_csv = csv.writer(archivo_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        escritor_csv.writerow([N, duracion, successful_counts, total_counts, ";".join(map(str, factors))])
+        print(f"Resultado para N={N} procesado y guardado.")
+print("Todos los circuitos ejecutados y se han guardado en el fichero resultados_cuanticos.csv")
+
+
+
+
+
+
+
