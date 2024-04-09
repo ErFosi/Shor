@@ -177,11 +177,14 @@ with open(nombre_archivo_csv, mode='w', newline='') as archivo_csv:
     escritor_csv.writerow(['N', 'Tiempo de Ejecución (s)', 'Aciertos', 'Conteos Totales', 'Factores Encontrados'])
 
 for N2 in primos:
-    N, duracion, successful_counts, total_counts, factors = ejecutar_shor(N2)
-    with open(nombre_archivo_csv, mode='a', newline='') as archivo_csv:
-        escritor_csv = csv.writer(archivo_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        escritor_csv.writerow([N, duracion, successful_counts, total_counts, ";".join(map(str, factors))])
-        print(f"Resultado para N={N} procesado y guardado.")
+    try:
+        N, duracion, successful_counts, total_counts, factors = ejecutar_shor(N2)
+        with open(nombre_archivo_csv, mode='a', newline='') as archivo_csv:
+            escritor_csv = csv.writer(archivo_csv, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            escritor_csv.writerow([N, duracion, successful_counts, total_counts, ";".join(map(str, factors))])
+            print(f"Resultado para N={N} procesado y guardado.")
+    except:
+        print("Error en numero:"+N)
 print("Todos los circuitos ejecutados y se han guardado en el fichero resultados_cuanticos.csv")
 
 
